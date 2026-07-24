@@ -56,9 +56,16 @@ if has('clipboard')
 endif
 vnoremap <C-c> "+y
 vnoremap <C-x> "+d
-nnoremap <C-v> "+gP
-inoremap <C-v> <C-r>+
+vnoremap <C-v> "+gP
 cnoremap <C-v> <C-r>+
+function! PasteClipboard()
+  let l:paste_save = &paste
+  set paste
+  normal! "+gP
+  let &paste = l:paste_save
+endfunction
+nnoremap <silent> <C-v> :call PasteClipboard()<CR>
+inoremap <silent> <C-v> <C-o>:call PasteClipboard()<CR>
 let mapleader=","
 if !empty(glob(g:vimhome . '/autoload/plug.vim'))
   call plug#begin(g:vimhome . '/plugged')
@@ -77,6 +84,7 @@ if !empty(glob(g:vimhome . '/autoload/plug.vim'))
   let g:ale_virtualtext_cursor = 1
   set omnifunc=ale#completion#OmniFunc
   let g:auto_pairs_shortcut_toggle = ''
+  let g:AutoPairs = {'(': ')', '[': ']', '"': '"', "'": "'", '`': '`'}
 else
   echohl WarningMsg
   echom 'vim-plug is missing, run the installer before using PlugInstall'
@@ -95,6 +103,36 @@ nnoremap <leader>tc :call InsertTemplate('codeforces')<CR>
 nnoremap <leader>tl :call InsertTemplate('leetcode')<CR>
 command! New call NewProblemFile()
 command! -nargs=1 Template call InsertTemplate(<f-args>)
+inoremap { {}<Left>
+inoremap <expr> <CR> SmartCR()
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : (strpart(getline('.'), 0, col('.') - 1) =~# '\<for$' ? "\<Esc>:call ExpandForLoop()\<CR>" : "\<Tab>")
+function! NextLoopVar()
+  let l:text = join(getline(1, '$'), "\n")
+  for l:v in ['i', 'j', 'k', 'l', 'm', 'n']
+    if l:text =~# '\<for\s*(\s*int\s\+' . l:v . '\s*='
+      continue
+    endif
+    return l:v
+  endfor
+  return 'i'
+endfunction
+function! ExpandForLoop()
+  normal! "_diw
+  let l:v = NextLoopVar()
+  let l:indent = matchstr(getline('.'), '^\s*')
+  call setline('.', l:indent . 'for (int ' . l:v . ' = 0; ' . l:v . ' < n; ' . l:v . '++) {')
+  call append(line('.'), [l:indent . '    ', l:indent . '}'])
+  call cursor(line('.') + 1, len(l:indent) + 5)
+  startinsert!
+endfunction
+function! SmartCR()
+  let l:line = getline('.')
+  let l:col = col('.')
+  if l:col > 1 && l:line[l:col - 2] ==# '{' && l:line[l:col - 1] ==# '}'
+    return "\<CR>\<Esc>O"
+  endif
+  return "\<CR>"
+endfunction
 function! InsertTemplate(name)
   let l:file = g:vimhome . '/snippets/' . a:name . '.cpp'
   if !filereadable(l:file)

@@ -75,9 +75,33 @@ On Windows the config folder is created as `%USERPROFILE%\.vimfiles` and marked 
 | `,` `8` | Normal | Open `H.cpp` |
 | `Ctrl+C` | Visual | Copy selection to the system clipboard |
 | `Ctrl+X` | Visual | Cut selection to the system clipboard |
-| `Ctrl+V` | Normal / Insert / Command | Paste from the system clipboard |
+| `Ctrl+V` | Normal / Insert / Visual / Command | Paste from the system clipboard, exactly as copied (no re-indent, no broken `//` comments) |
+| `for` + `Tab` | Insert | Expand into a full `for` loop, auto-picking the next free loop variable |
+| `{` + `Enter` | Insert | Auto-close `{}` and turn an empty pair into an indented block on Enter |
 | `:New` | Command | Create the next unused lettered file and insert the contest template |
 | `:Template <name>` | Command | Insert a specific template by name (`contest`, `codeforces`, `leetcode`) |
+
+## Smart `for` loops
+
+Typing `for` and pressing `Tab` expands into:
+
+```cpp
+for (int i = 0; i < n; i++) {
+    
+}
+```
+
+It scans the whole buffer for `for (int X = ...` loops already written and skips any variable already in use, walking through `i, j, k, l, m, n` until it finds a free one. So nesting a second loop after one that already uses `i` gives you `j` automatically, a third gives you `k`, and so on.
+
+## Smart braces
+
+Typing `{` auto-inserts the matching `}` with the cursor between them. Pressing `Enter` right there expands it into an indented block instead of leaving `{}` on one line:
+
+```cpp
+void solve() {
+    // cursor lands here, already indented
+}
+```
 
 ## Templates
 
