@@ -17,7 +17,9 @@ A minimal Vim setup for competitive programming in C++, built for Windows and Li
 | Linting and completion | ALE with clangd and gcc |
 | Formatting | clang-format on save |
 | Color scheme | custom dark theme, `competitive` |
-| Snippet system | single contest template inserted through a Vimscript function |
+| Config folder | `~/.vimfiles` on Windows (hidden), `~/.vim` on Linux |
+| System clipboard | `Ctrl+C` to copy, `Ctrl+V` to paste, on both platforms |
+| Snippet system | three templates (contest, codeforces, leetcode) inserted through a Vimscript function |
 | Platforms | Windows (`installer.ps1`) and Linux (`installer.sh`) |
 
 ## Installation
@@ -29,11 +31,13 @@ A minimal Vim setup for competitive programming in C++, built for Windows and Li
 
 Both installers check for `g++` and `vim` on PATH, create the required config folders, download `vim-plug`, copy all configuration files, and install plugins automatically.
 
+On Windows the config folder is created as `%USERPROFILE%\.vimfiles` and marked hidden with `attrib +h`. Since Vim on Windows doesn't look at a dotted folder by default, `vimrc` explicitly points `runtimepath`/`packpath` at it, so colors, plugins, ftplugin, and snippets all load from there.
+
 ## Requirements
 
 | Tool | Windows | Linux |
 |---|---|---|
-| Vim | gVim from vim.org or `winget install vim.vim` | `apt install vim` or equivalent |
+| Vim | gVim from vim.org or `winget install vim.vim` | `apt install vim-gtk3` (needed for clipboard support) |
 | C++ compiler | MinGW-w64 or MSYS2 | `apt install g++` or equivalent |
 | clangd and clang-format | LLVM installer | `apt install clangd clang-format` |
 | curl | included in Windows 10/11 | included in most distributions |
@@ -58,7 +62,9 @@ Both installers check for `g++` and `vim` on PATH, create the required config fo
 | Shift + Tab | Normal | Previous buffer |
 | `,` `f` `f` | Normal | Start `:find` file search |
 | `,` `g` `g` | Normal | Start `:vimgrep` search across `.cpp` files |
-| `,` `t` `p` | Normal | Insert the contest template at the cursor |
+| `,` `t` `p` | Normal | Insert the **contest** template |
+| `,` `t` `c` | Normal | Insert the **codeforces** template |
+| `,` `t` `l` | Normal | Insert the **leetcode** template |
 | `,` `1` | Normal | Open `A.cpp` |
 | `,` `2` | Normal | Open `B.cpp` |
 | `,` `3` | Normal | Open `C.cpp` |
@@ -67,17 +73,31 @@ Both installers check for `g++` and `vim` on PATH, create the required config fo
 | `,` `6` | Normal | Open `F.cpp` |
 | `,` `7` | Normal | Open `G.cpp` |
 | `,` `8` | Normal | Open `H.cpp` |
-| `:New` | Command | Create the next unused lettered file and insert the template |
+| `Ctrl+C` | Visual | Copy selection to the system clipboard |
+| `Ctrl+X` | Visual | Cut selection to the system clipboard |
+| `Ctrl+V` | Normal / Insert / Command | Paste from the system clipboard |
+| `:New` | Command | Create the next unused lettered file and insert the contest template |
+| `:Template <name>` | Command | Insert a specific template by name (`contest`, `codeforces`, `leetcode`) |
+
+## Templates
+
+| Name | File | Use case |
+|---|---|---|
+| `contest` | `snippets/contest.cpp` | General template used by `:New` and the lettered files (`A.cpp`...`H.cpp`) |
+| `codeforces` | `snippets/codeforces.cpp` | Fast I/O plus a `t` test-case loop, nothing else, so you can start typing right away |
+| `leetcode` | `snippets/leetcode.cpp` | A `// Paste Solution Class` marker where you drop LeetCode's `class Solution { ... };` block, plus a `main` that instantiates it |
 
 ## Project structure
 
 | Path | Content |
 |---|---|
-| `vimrc` | Core configuration, plugin declarations, mappings |
+| `vimrc` | Core configuration, plugin declarations, mappings, clipboard setup |
 | `colors/competitive.vim` | Custom dark color scheme |
 | `plugin/quickfiles.vim` | Quick mappings to switch between lettered problem files |
 | `ftplugin/cpp.vim` | C++ indentation and compiler settings |
-| `snippets/template.cpp` | Contest starting template |
-| `installer.ps1` | Windows installer |
+| `snippets/contest.cpp` | Contest starting template |
+| `snippets/codeforces.cpp` | Codeforces starting template |
+| `snippets/leetcode.cpp` | LeetCode starting template |
+| `installer.ps1` | Windows installer, deploys to hidden `.vimfiles` |
 | `installer.sh` | Linux installer |
 | `autoload/`, `plugged/` | Populated automatically by vim-plug |

@@ -1,5 +1,14 @@
 " Author: z1rov
 set nocompatible
+if has('win32') || has('win64')
+  let g:vimhome = expand('~/.vimfiles')
+  let g:exeext = '.exe'
+  let &runtimepath = g:vimhome . ',' . $VIMRUNTIME . ',' . g:vimhome . '/after'
+  let &packpath = &runtimepath
+else
+  let g:vimhome = expand('~/.vim')
+  let g:exeext = ''
+endif
 filetype plugin indent on
 syntax on
 set number
@@ -33,20 +42,24 @@ set nobackup
 set nowritebackup
 set splitbelow
 set splitright
-set clipboard=unnamed
 set guioptions-=m
 set guioptions-=T
 set guioptions-=r
 set guioptions-=L
 set guifont=Consolas:h11
-let mapleader=","
-if has('win32') || has('win64')
-  let g:vimhome = expand('~/vimfiles')
-  let g:exeext = '.exe'
-else
-  let g:vimhome = expand('~/.vim')
-  let g:exeext = ''
+if has('clipboard')
+  if has('win32') || has('win64')
+    set clipboard=unnamed
+  else
+    set clipboard=unnamedplus
+  endif
 endif
+vnoremap <C-c> "+y
+vnoremap <C-x> "+d
+nnoremap <C-v> "+gP
+inoremap <C-v> <C-r>+
+cnoremap <C-v> <C-r>+
+let mapleader=","
 if !empty(glob(g:vimhome . '/autoload/plug.vim'))
   call plug#begin(g:vimhome . '/plugged')
   Plug 'dense-analysis/ale'
@@ -77,14 +90,24 @@ nnoremap <Tab> :bnext<CR>
 nnoremap <S-Tab> :bprevious<CR>
 nnoremap <leader>ff :find<Space>
 nnoremap <leader>gg :vimgrep //gj **/*.cpp<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
-nnoremap <leader>tp :call InsertTemplate()<CR>
+nnoremap <leader>tp :call InsertTemplate('contest')<CR>
+nnoremap <leader>tc :call InsertTemplate('codeforces')<CR>
+nnoremap <leader>tl :call InsertTemplate('leetcode')<CR>
 command! New call NewProblemFile()
-function! InsertTemplate()
+command! -nargs=1 Template call InsertTemplate(<f-args>)
+function! InsertTemplate(name)
+  let l:file = g:vimhome . '/snippets/' . a:name . '.cpp'
+  if !filereadable(l:file)
+    echohl ErrorMsg
+    echo 'template not found: ' . a:name
+    echohl None
+    return
+  endif
   if line('$') == 1 && getline(1) == ''
-    execute '0read ' . g:vimhome . '/snippets/template.cpp'
+    execute '0read ' . l:file
     normal! Gdd
   else
-    execute '-1read ' . g:vimhome . '/snippets/template.cpp'
+    execute '-1read ' . l:file
   endif
   normal! Gzz
 endfunction
@@ -95,7 +118,7 @@ function! NewProblemFile()
     let l:name = l:letters[l:i] . '.cpp'
     if !filereadable(l:name)
       execute 'edit ' . l:name
-      call InsertTemplate()
+      call InsertTemplate('contest')
       return
     endif
     let l:i += 1

@@ -8,6 +8,7 @@ Write-Host "/___/_/_/   \____/|___/      |___/_/_/ /_/ /_/ "
 Write-Host ""
 
 $root = $PSScriptRoot
+$vimhome = "$HOME\.vimfiles"
 
 Write-Host "[~] checking dependencies"
 
@@ -29,17 +30,18 @@ if ($vimCmd) {
 }
 
 Write-Host "[~] creating vimfiles folders"
-New-Item -ItemType Directory -Force -Path "$HOME\vimfiles\autoload" | Out-Null
-New-Item -ItemType Directory -Force -Path "$HOME\vimfiles\plugged" | Out-Null
-New-Item -ItemType Directory -Force -Path "$HOME\vimfiles\colors" | Out-Null
-New-Item -ItemType Directory -Force -Path "$HOME\vimfiles\plugin" | Out-Null
-New-Item -ItemType Directory -Force -Path "$HOME\vimfiles\ftplugin" | Out-Null
-New-Item -ItemType Directory -Force -Path "$HOME\vimfiles\snippets" | Out-Null
+New-Item -ItemType Directory -Force -Path "$vimhome\autoload" | Out-Null
+New-Item -ItemType Directory -Force -Path "$vimhome\plugged" | Out-Null
+New-Item -ItemType Directory -Force -Path "$vimhome\colors" | Out-Null
+New-Item -ItemType Directory -Force -Path "$vimhome\plugin" | Out-Null
+New-Item -ItemType Directory -Force -Path "$vimhome\ftplugin" | Out-Null
+New-Item -ItemType Directory -Force -Path "$vimhome\snippets" | Out-Null
+attrib +h "$vimhome"
 Write-Host "[+] folders ready"
 
 Write-Host "[~] downloading vim-plug"
 try {
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" -OutFile "$HOME\vimfiles\autoload\plug.vim"
+  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" -OutFile "$vimhome\autoload\plug.vim"
   Write-Host "[+] vim-plug downloaded"
 } catch {
   Write-Host "[-] vim-plug download failed, check your connection"
@@ -47,10 +49,10 @@ try {
 
 Write-Host "[~] copying configuration files"
 Copy-Item -Path "$root\vimrc" -Destination "$HOME\_vimrc" -Force
-Copy-Item -Path "$root\colors\*" -Destination "$HOME\vimfiles\colors\" -Recurse -Force
-Copy-Item -Path "$root\plugin\*" -Destination "$HOME\vimfiles\plugin\" -Recurse -Force
-Copy-Item -Path "$root\ftplugin\*" -Destination "$HOME\vimfiles\ftplugin\" -Recurse -Force
-Copy-Item -Path "$root\snippets\*" -Destination "$HOME\vimfiles\snippets\" -Recurse -Force
+Copy-Item -Path "$root\colors\*" -Destination "$vimhome\colors\" -Recurse -Force
+Copy-Item -Path "$root\plugin\*" -Destination "$vimhome\plugin\" -Recurse -Force
+Copy-Item -Path "$root\ftplugin\*" -Destination "$vimhome\ftplugin\" -Recurse -Force
+Copy-Item -Path "$root\snippets\*" -Destination "$vimhome\snippets\" -Recurse -Force
 Write-Host "[+] configuration files copied"
 
 if ($vimCmd -and $vimCmd.Name -eq "gvim.exe") {
